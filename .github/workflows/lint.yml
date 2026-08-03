@@ -1,0 +1,70 @@
+name: Lint
+on:
+  pull_request:
+    paths:
+      - "**/*.go"
+      - "go.mod"
+      - "go.sum"
+      - ".golangci.yml"
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+      # Allow lint annotations in the PR.
+      pull-requests: read
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Install gofumpt
+        run: go install mvdan.cc/gofumpt@latest
+
+      # GITHUB_TOKEN is read-only for fork PRs regardless of the permissions block above, so the
+      # autofix-and-push steps below are skipped there: they would fail the job on every external
+      # contribution. Forks get the read-only check at the end of the job instead.
+      - name: Format code
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: gofumpt -w .
+
+      - name: Run golangci-lint (fix)
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: golangci/golangci-lint-action@v9
+        with:
+          args: --fix --issues-exit-code=0 --timeout=5m
+          install-mode: goinstall
+          version: latest
+
+      - name: Commit changes
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          # commit_author defaults to the triggering user (github.actor), so linter fixes are
+          # attributed to the PR author and committed by the github-actions bot.
+          commit_message: "chore: apply linter fixes and formatting"
+
+      - name: Run golangci-lint (check)
+        uses: golangci/golangci-lint-action@v9
+        with:
+          args: --timeout=5m
+          install-mode: goinstall
+          version: latest

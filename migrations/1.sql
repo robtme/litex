@@ -1,0 +1,1 @@
+CREATE TABLE mig_test (id INTEGER PRIMARY KEY);
