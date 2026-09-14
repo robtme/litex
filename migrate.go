@@ -42,8 +42,13 @@ func (s *Service) Migrate(ctx context.Context, migrations fs.FS) error {
 		return err
 	}
 
-	if migrationsRan && !s.memory {
-		s.vacuum(ctx)
+	if migrationsRan {
+		if !s.memory {
+			s.vacuum(ctx)
+		}
+
+		// Schema changes (new indexes especially) invalidate sqlite_stat1.
+		s.optimize()
 	}
 
 	return nil

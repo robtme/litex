@@ -30,6 +30,9 @@ const (
 	// pool.
 	idleConnectionPoolDivider = 2
 
+	// optimizeTimeout bounds PRAGMA optimize, which may run ANALYZE on several tables.
+	optimizeTimeout = 30 * time.Second
+
 	// pingTimeout enforces a timeout for the initial connection ping.
 	pingTimeout = 5 * time.Second
 
@@ -127,6 +130,8 @@ func (s *Service) Close() error {
 			errs = append(errs, fmt.Errorf("flush batch: %w", err))
 		}
 
+		s.optimize()
+
 		// The fields keep pointing at the closed handles: clearing them would turn a caller mid-call
 		// into a nil dereference.
 		if err := s.connRO.Close(); err != nil {
@@ -176,6 +181,19 @@ func (s *Service) Open() error {
 	s.connRO, s.connRW = connRO, connRW
 
 	return nil
+}
+
+// optimize runs PRAGMA optimize on the read-write connection, letting SQLite re-ANALYZE tables whose
+// statistics have gone stale. Recommended after schema changes and before closing a long-lived
+// connection. Failures are logged rather than returned; stale query plans are not worth failing a
+// shutdown or a startup over.
+func (s *Service) optimize() {
+	ctx, cancel := context.WithTimeout(context.Background(), optimizeTimeout)
+	defer cancel()
+
+	if _, err := s.connRW.ExecContext(ctx, "PRAGMA optimize"); err != nil {
+		s.logger.Warn().Err(err).Msg("Database optimize failed")
+	}
 }
 
 // setupConn initializes a SQLite database connection with configured PRAGMA settings and connection pooling. We set
@@ -228,6 +246,7 @@ func setupConn(dsn string, memory bool, readOnly bool) (*sql.DB, error) {
 			"cache_size(2000)",             // Larger page cache for the read-write connection to improve write/query efficiency.
 			"foreign_keys(1)",              // Enforce foreign key constraints on writes.
 			"journal_size_limit(67108864)", // Caps WAL file size (~64MB) before it is truncated during checkpoints.
+			"optimize(0x10002)",            // Re-ANALYZE tables whose row counts drifted since the last run; recommended once per long-lived connection.
 			"synchronous(NORMAL)",          // Relax fsync frequency for better performance with acceptable durability tradeoff (safe with WAL).
 		)
 
@@ -266,5 +285,6 @@ func getMin(val int) int {
 	if val < 1 {
 		return 1
 	}
+
 	return val
 }
