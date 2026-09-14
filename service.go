@@ -190,10 +190,10 @@ func setupConn(dsn string, memory bool, readOnly bool) (*sql.DB, error) {
 	var formattedDSN string
 
 	if !memory {
-		formattedDSN = "file:" + dsn + "?_time_format=sqlite&mode=" + mode
+		formattedDSN = "file:" + dsn + "?_time_format=sqlite&_timezone=UTC&mode=" + mode
 	} else {
 		// Share the in-memory database so the separate RO/RW connections use the same DB.
-		formattedDSN = "file:" + dsn + "?mode=memory&cache=shared&_time_format=sqlite"
+		formattedDSN = "file:" + dsn + "?mode=memory&cache=shared&_time_format=sqlite&_timezone=UTC"
 	}
 
 	var idleConnectionPool, maxConnectionPool int
