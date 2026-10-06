@@ -1,8 +1,8 @@
 # LiteX
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/wolveix/litex.svg)](https://pkg.go.dev/github.com/wolveix/litex)
-[![Test](https://github.com/wolveix/litex/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/wolveix/litex/actions/workflows/test.yml)
-[![Lint](https://github.com/wolveix/litex/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/wolveix/litex/actions/workflows/lint.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/robtme/litex.svg)](https://pkg.go.dev/github.com/robtme/litex)
+[![Test](https://github.com/robtme/litex/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/robtme/litex/actions/workflows/test.yml)
+[![Lint](https://github.com/robtme/litex/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/robtme/litex/actions/workflows/lint.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Shared SQLite plumbing for Go services: tuned connection setup, transaction helpers, embedded migrations, and small
@@ -44,7 +44,7 @@ better as hand-written SQL, write it as hand-written SQL.
 ## Install
 
 ```sh
-go get github.com/wolveix/litex
+go get github.com/robtme/litex
 ```
 
 ## Quick start
@@ -241,4 +241,4 @@ developer-controlled values, never request data.
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=wolveix/litex&type=Date)](https://star-history.com/#wolveix/litex&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=robtme/litex&type=Date)](https://star-history.com/#robtme/litex&Date)

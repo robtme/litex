@@ -7,10 +7,10 @@ import (
 	"embed"
 	"encoding/hex"
 
+	"github.com/robtme/litex"
 	"github.com/rs/zerolog"
-	"github.com/wolveix/litex"
 
-	"github.com/wolveix/litex/example/domain"
+	"github.com/robtme/litex/example/domain"
 )
 
 //go:embed migrations/*.sql

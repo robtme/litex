@@ -6,15 +6,17 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/wolveix/litex"
+	"github.com/robtme/litex"
 
-	"github.com/wolveix/litex/example/domain"
+	"github.com/robtme/litex/example/domain"
 )
 
 // Ensure the concrete transactions satisfy the domain interfaces.
-var _ domain.BatchTX = (*BatchTX)(nil)
-var _ domain.ReadTX = (*ReadTX)(nil)
-var _ domain.WriteTX = (*WriteTX)(nil)
+var (
+	_ domain.BatchTX = (*BatchTX)(nil)
+	_ domain.ReadTX  = (*ReadTX)(nil)
+	_ domain.WriteTX = (*WriteTX)(nil)
+)
 
 // CreateUser inserts a new user.
 func (w *WriteTX) CreateUser(ctx context.Context, user *domain.User) error {

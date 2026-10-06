@@ -9,9 +9,9 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/wolveix/litex"
-	"github.com/wolveix/litex/example/domain"
-	"github.com/wolveix/litex/example/sqlite"
+	"github.com/robtme/litex"
+	"github.com/robtme/litex/example/domain"
+	"github.com/robtme/litex/example/sqlite"
 )
 
 func main() {
