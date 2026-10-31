@@ -115,21 +115,11 @@ func (s *Service) CommitRead(ctx context.Context, newTx func(*BaseTX) any, fn fu
 	if err != nil {
 		return fmt.Errorf("commit read: begin: %w", err)
 	}
-	defer func() {
-		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
-			s.logger.Error().Err(rollbackErr).Msg("Failed to rollback read-only transaction")
-		}
-	}()
 
-	if err = fn(newTx(&BaseTX{logger: *s.logger, tx: tx})); err != nil {
-		return err
-	}
+	// Read-only, so rollback just releases the snapshot and its error isn't actionable.
+	defer func() { _ = tx.Rollback() }()
 
-	if err = tx.Commit(); err != nil {
-		return fmt.Errorf("commit read: end: %w", err)
-	}
-
-	return nil
+	return fn(newTx(&BaseTX{logger: *s.logger, tx: tx}))
 }
 
 // CommitWrite opens a read-write database transaction.
